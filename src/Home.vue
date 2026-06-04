@@ -47,7 +47,7 @@
                 <span v-if="question.solved">✓</span>
               </button>
 
-              <div class="question-content">
+              <div  class="question-content">
                 <p class="question-title" @click="openQuestion(question.id)">{{ question.title }}</p>
                 <p class="question-desc">{{ question.description }}</p>
               </div>
@@ -315,6 +315,7 @@ h1 {
 
 .question-content {
   min-width: 0;
+  cursor: pointer;
 }
 
 .question-title {
