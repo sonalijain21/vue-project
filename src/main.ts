@@ -2,7 +2,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
+import router from './router/index.ts'
 import { install as MonacoEditorPlugin } from '@guolao/vue-monaco-editor'
 
 const app = createApp(App)
