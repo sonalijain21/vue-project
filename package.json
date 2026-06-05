@@ -8,8 +8,10 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build"
-    ,"postinstall": "node ./scripts/copy-sql-wasm.js"
+    "type-check": "vue-tsc --build",
+    "postinstall": "node ./scripts/copy-sql-wasm.js",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@guolao/vue-monaco-editor": "^1.6.0",
@@ -24,6 +26,7 @@
     "@types/node": "^24.12.2",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/tsconfig": "^0.9.1",
+    "gh-pages": "^5.0.0",
     "npm-run-all2": "^8.0.4",
     "typescript": "~6.0.0",
     "vite": "^8.0.8",
