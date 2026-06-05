@@ -36,7 +36,7 @@
           v-model="problem.description"
           class="edit-textarea"
           rows="8"
-        />
+        ></textarea>
 
         <button
           v-if="!isTeacher && !showTutorial"
@@ -62,7 +62,7 @@
             v-model="problem.tutorial"
             class="edit-textarea"
             rows="10"
-          />
+          ></textarea>
 
           <button
             v-if="!isTeacher && showTutorial"
