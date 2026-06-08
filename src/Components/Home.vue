@@ -12,16 +12,9 @@
 
     <main class="layout"
   :style="{
-    gridTemplateColumns: isTeacher ? '1fr' : '240px 1fr'
+    gridTemplateColumns: isTeacher ? '1fr' : '20em 1fr'
   }">
-      <section  v-if="!isTeacher" class="summary-card" >
-        <p class="summary-label">Total Problems Solved</p>
-        <div class="summary-circle">
-          <span>{{ solvedCount }}</span>
-          <small>/ {{ totalCount }}</small>
-        </div>
-      </section>
-
+   <Student-Progress :sections="sections" :isTeacher="isTeacher" />
       <section class="board">
         <article v-for="section in sections" :key="section.name" class="difficulty-card">
           <div class="difficulty-header">
@@ -65,16 +58,17 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { Pencil, Trash2 } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
+import StudentProgress from './features/Student-Progress.vue'
 
 const router = useRouter()
 
 function openQuestion(id){
   router.push(`/problem/${id}`)
 }
-const isTeacher = true
+const isTeacher = false
 
 const sections = ref([
   {
@@ -130,10 +124,7 @@ const sections = ref([
   },
 ])
 
-const totalCount = computed(() => sections.value.reduce((sum, section) => sum + section.items.length, 0))
-const solvedCount = computed(() =>
-  sections.value.reduce((sum, section) => sum + section.items.filter((item) => item.solved).length, 0),
-)
+
 
 function toggleSolved(id) {
   for (const section of sections.value) {
@@ -191,7 +182,7 @@ h1 {
 
 .layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 20em 1fr;
   gap: 24px;
   align-items: start;
 }
