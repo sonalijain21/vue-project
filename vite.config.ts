@@ -14,4 +14,9 @@ export default defineConfig(({ command }) => ({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    hmr: {
+      overlay: false
+    }
+  }
 }))

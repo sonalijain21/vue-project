@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from '../Components/Home.vue'
 import ProblemDetails from '../Components/ProblemDetails.vue'
+import QuestionCreate from '../Components/features/QuestionCreate.vue'
 
 const routes = [
   {
@@ -12,6 +13,11 @@ const routes = [
     path: '/problem/:id',
     name: 'ProblemDetails',
     component: ProblemDetails,
+  },
+   {
+    path: '/teacher/question/new',
+    name: 'question-create',
+    component: QuestionCreate,
   },
 ]
 
