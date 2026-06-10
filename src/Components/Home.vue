@@ -10,44 +10,79 @@
       </button>
     </header>
 
-    <main class="layout"
-  :style="{
-    gridTemplateColumns: isTeacher ? '1fr' : '20em 1fr'
-  }">
-   <Student-Progress :sections="sections" :isTeacher="isTeacher" />
+    <main
+      class="layout"
+      :style="{
+        gridTemplateColumns: isTeacher ? '1fr' : '20em 1fr'
+      }"
+    >
+      <StudentProgress :sections="sections" :isTeacher="isTeacher" />
+
       <section class="board">
-        <article v-for="section in sections" :key="section.name" class="difficulty-card">
+        <div v-if="loading" class="state-box">Loading questions...</div>
+        <div v-else-if="errorMsg" class="state-box error">{{ errorMsg }}</div>
+
+        <article
+          v-for="section in sections"
+          :key="section.name"
+          class="difficulty-card"
+        >
           <div class="difficulty-header">
             <div class="header-left">
               <h2>{{ section.name }}</h2>
               <span class="count">{{ section.items.length }} questions</span>
             </div>
 
-            <button  v-if="isTeacher" class="add-btn" type="button" title="Add question">
+            <button
+              v-if="isTeacher"
+              class="add-btn"
+              type="button"
+              title="Add question"
+              @click="goToAddQuestion(section.name)"
+            >
               +
             </button>
           </div>
 
           <div class="question-list">
-            <div v-for="question in section.items" :key="question.id" class="question-row">
-              <button v-if="!isTeacher"
+            <div
+              v-for="question in section.items"
+              :key="question.id"
+              class="question-row"
+            >
+              <button
+                v-if="!isTeacher"
                 class="todo-circle"
                 :class="{ solved: question.solved }"
                 type="button"
                 :aria-label="question.solved ? 'Mark unsolved' : 'Mark solved'"
-                @click="toggleSolved(question.id)"
+                @click="toggleSolved(question)"
               >
                 <span v-if="question.solved">✓</span>
               </button>
 
-              <div  class="question-content">
-                <p class="question-title" @click="openQuestion(question.id)">{{ question.title }}</p>
+              <div class="question-content">
+                <p class="question-title" @click="openQuestion(question.id)">
+                  {{ question.title }}
+                </p>
                 <p class="question-desc">{{ question.description }}</p>
               </div>
 
               <div class="actions" v-if="isTeacher">
-                <button type="button" class="text-btn"> <Pencil :size="18" /></button>
-                <button type="button" class="text-btn danger"> <Trash2 :size="18" /></button>
+                <button
+                  type="button"
+                  class="text-btn"
+                  @click="editQuestion(question.id)"
+                >
+                  <Pencil :size="18" />
+                </button>
+                <button
+                  type="button"
+                  class="text-btn danger"
+                  @click="deleteQuestion(question.id)"
+                >
+                  <Trash2 :size="18" />
+                </button>
               </div>
             </div>
           </div>
@@ -57,90 +92,126 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import { Pencil, Trash2 } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import StudentProgress from './features/Student-Progress.vue'
+import { supabase } from '../lib/supabase'
+
+type Difficulty = 'Easy' | 'Medium' | 'Hard'
+
+type Problem = {
+  id: string
+  title: string
+  description: string
+  tutorial: string | null
+  difficulty: Difficulty | null
+  solved: boolean
+  topic: string | null
+  created_at: string
+  updated_at: string
+}
 
 const router = useRouter()
+const isTeacher = true
 
-function openQuestion(id){
+const questions = ref<Problem[]>([])
+const loading = ref(false)
+const errorMsg = ref('')
+
+const sections = computed(() => {
+  return [
+    {
+      name: 'Easy',
+      items: questions.value.filter((q) => q.difficulty === 'Easy'),
+    },
+    {
+      name: 'Medium',
+      items: questions.value.filter((q) => q.difficulty === 'Medium'),
+    },
+    {
+      name: 'Hard',
+      items: questions.value.filter((q) => q.difficulty === 'Hard'),
+    },
+  ]
+})
+
+function openQuestion(id: string) {
   router.push(`/problem/${id}`)
 }
-const isTeacher = false
 
-const sections = ref([
-  {
-    name: 'Easy',
-    items: [
-      {
-        id: 1,
-        title: 'Two Sum',
-        description: 'Find two numbers that add up to a target value.',
-        solved: false,
-      },
-      {
-        id: 2,
-        title: 'Palindrome Check',
-        description: 'Check whether a string reads the same forward and backward.',
-        solved: true,
-      },
-    ],
-  },
-  {
-    name: 'Medium',
-    items: [
-      {
-        id: 3,
-        title: 'Merge Intervals',
-        description: 'Combine overlapping intervals into a single range.',
-        solved: false,
-      },
-      {
-        id: 4,
-        title: 'Longest Substring',
-        description: 'Find the longest substring without repeating characters.',
-        solved: false,
-      },
-    ],
-  },
-  {
-    name: 'Hard',
-    items: [
-      {
-        id: 5,
-        title: 'LRU Cache',
-        description: 'Design a cache that removes least recently used items.',
-        solved: false,
-      },
-      {
-        id: 6,
-        title: 'Word Ladder',
-        description: 'Transform one word into another using shortest steps.',
-        solved: false,
-      },
-    ],
-  },
-])
-
-
-
-function toggleSolved(id) {
-  for (const section of sections.value) {
-    const question = section.items.find((item) => item.id === id)
-    if (question) {
-      question.solved = !question.solved
-      break
-    }
+function goToAddQuestion(difficulty?: string) {
+  if (difficulty) {
+    router.push({ path: '/teacher/question/new', query: { difficulty } })
+    return
   }
+  router.push('/teacher/question/new')
 }
+
+function editQuestion(id: string) {
+  router.push(`/teacher/question/${id}/edit`)
+}
+
+async function deleteQuestion(id: string) {
+  const ok = window.confirm('Delete this question?')
+  if (!ok) return
+
+  const { error } = await supabase.from('problems').delete().eq('id', id)
+
+  if (error) {
+    errorMsg.value = error.message
+    return
+  }
+
+  await loadQuestions()
+}
+
+async function toggleSolved(question: Problem) {
+  const { error } = await supabase
+    .from('problems')
+    .update({
+      solved: !question.solved,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', question.id)
+
+  if (error) {
+    errorMsg.value = error.message
+    return
+  }
+
+  await loadQuestions()
+}
+
+async function loadQuestions() {
+  loading.value = true
+  errorMsg.value = ''
+
+  const { data, error } = await supabase
+    .from('problems')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    errorMsg.value = error.message
+    questions.value = []
+    loading.value = false
+    return
+  }
+
+  questions.value = (data ?? []) as Problem[]
+  loading.value = false
+}
+
+onMounted(loadQuestions)
 </script>
 
 <style scoped>
 :global(body) {
   margin: 0;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
   background: #f7f8fc;
   color: #1f2937;
 }
@@ -187,56 +258,27 @@ h1 {
   align-items: start;
 }
 
-.summary-card,
-.difficulty-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
-}
-
-.summary-card {
-  padding: 24px;
-  position: sticky;
-  top: 24px;
-}
-
-.summary-label {
-  margin: 0 0 16px;
-  font-size: 14px;
-  color: #6b7280;
-  text-align: center;
-}
-
-.summary-circle {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  border: 10px solid #d1fae5;
-  display: grid;
-  place-items: center;
-  margin: 0 auto 16px;
-  text-align: center;
-}
-
-.summary-circle span {
-  display: block;
-  font-size: 42px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.summary-circle small {
-  font-size: 18px;
-  color: #6b7280;
-}
-
 .board {
   display: grid;
   gap: 18px;
 }
 
+.state-box {
+  padding: 16px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+
+.state-box.error {
+  color: #b91c1c;
+}
+
 .difficulty-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
   padding: 20px;
 }
 
@@ -341,10 +383,6 @@ h1 {
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;
-  }
-
-  .summary-card {
-    position: static;
   }
 }
 </style>

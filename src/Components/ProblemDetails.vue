@@ -86,7 +86,7 @@ import { useRouter } from 'vue-router'
 import SQLPlayground from './SQLPlayground.vue'
 
 const router = useRouter()
-const isTeacher = false
+const isTeacher = true
 const isEditing = ref(false)
 const showTutorial = ref(false)
 
