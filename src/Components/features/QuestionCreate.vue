@@ -17,7 +17,7 @@
         </div>
 
         <div class="field">
-          <label>Description</label>
+          <label>Description of the Problem</label>
           <textarea
             v-model="description"
             rows="6"
