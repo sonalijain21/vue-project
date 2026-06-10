@@ -10,5 +10,13 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+  "env": {
+    "production": {
+      "vars": {
+        "VITE_SUPABASE_URL": "https://nsetcccdmkbkqkdgyxtg.supabase.co",
+        "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_MvE1X7_HDMgqK6Xz3qDltg_QBL16gs6"
+      }
+    }
+  }
 }
